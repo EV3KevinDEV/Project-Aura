@@ -185,6 +185,17 @@ public class EndEffector extends SubsystemBase {
     }, this);
   }
 
+  // public Command funnyBlinkCommand() {
+  //   return new InstantCommand(() -> {
+  //     m_LedSubsystem.setState(LEDState.NOTE_DETECTED)
+  //   }, this);
+  // }
+
+  // Command zeepleCommand = Commands.sequence(m_LedSubsystem.setState(LEDState.NOTE_DETECTED),
+  //                                     Commands.waitSeconds(0.5),
+  //                                     m_LedSubsystem.setState(LEDState.FIRE_EFFECT))
+  // CommandScheduler.getInstance().ScheduleCommand(zeepleCommand);
+
   public double getFilterCurrent(){
     return m_currenFilter.calculate(intakeMotor.getOutputCurrent());
   }
@@ -258,12 +269,15 @@ public class EndEffector extends SubsystemBase {
     return distanceSensor.getRange() < 8 && distanceSensor.getRange() > 0;
   }
 
+  
+
   public void spinupFlywheel() {
     isFlywheelRunning = true;
 
     //uncomment for smart pid control and for auto aim to work properly and accurately
     // pidController.setReference(setpoint, CANSparkMax.ControlType.kSmartMotion);
-    flywheelMotorTop.set(-0.83);
+    flywheelMotorTop.set(-0.7);
+
     // flywheelMotorBottom.set(-1);
   }
 

@@ -149,9 +149,14 @@ public class RobotContainer {
   final Trigger driverCross = m_driverControllerCommand.cross();
   final Trigger driverCircle = m_driverControllerCommand.circle();
   final Trigger driverTriangle = m_driverControllerCommand.triangle();
+  final Trigger driverSquare = m_driverControllerCommand.square();
   final Trigger driverDPADUP = m_driverControllerCommand.povUp();
   final Trigger driverDPADDOWN = m_driverControllerCommand.povDown();
-  final Trigger driverSquare = m_driverControllerCommand.square();
+  final Trigger driverDPADLEFT = m_driverControllerCommand.povLeft();
+  final Trigger driverDPADRIGHT = m_driverControllerCommand.povRight();
+  final Trigger driverPSButton = m_driverControllerCommand.PS();
+  final Trigger driverFunnyLeft = m_driverControllerCommand.share(); // funny left
+  final Trigger driverFunnyRight = m_driverControllerCommand.options(); // funny right
 
 
   final Trigger auxL1 = m_auxController.L1();
@@ -311,11 +316,10 @@ public class RobotContainer {
     // Autos
     autoChooser.setDefaultOption("No Auto", Commands.none());
     autoChooser.addOption("Basic 2 Piece", new PathPlannerAuto("2 Note Auto"));
-    autoChooser.addOption("2 Piece top", new PathPlannerAuto("2 Note Subwoofer Top"));
-    autoChooser.addOption("6 Note", new PathPlannerAuto("Note 6 Normal"));
-    autoChooser.addOption("5 Note Far Left", new PathPlannerAuto("5 Note Far Left"));
-    autoChooser.addOption("5 Note Right", new PathPlannerAuto("Note 5"));
-    autoChooser.addOption("6 Note through Stage", new PathPlannerAuto("Note 6 Stage"));
+    //autoChooser.addOption("2 Piece top", new PathPlannerAuto("2 Note Subwoofer Top"));
+   // autoChooser.addOption("5 Note Far Left", new PathPlannerAuto("5 Note Far Left"));
+   // autoChooser.addOption("5 Note Right", new PathPlannerAuto("Note 5"));
+   // autoChooser.addOption("6 Note through Stage", new PathPlannerAuto("Note 6 Stage"));
     autoChooser.addOption("1 Piece Auto", Commands.sequence(
       pivot.pivotMoveCommand(0),
       Commands.waitSeconds(2),
@@ -326,10 +330,10 @@ public class RobotContainer {
       endEffector.toggleIntakeCommand(),
       endEffector.toggleFlywheelCommand()
     ));
-    autoChooser.addOption("3 Piece", new PathPlannerAuto("3 Note Auto"));
-    autoChooser.addOption("4 Piece", new PathPlannerAuto("4 Note Auto"));
+  //  autoChooser.addOption("3 Piece", new PathPlannerAuto("3 Note Auto"));
+   // autoChooser.addOption("4 Piece", new PathPlannerAuto("4 Note Auto"));
     autoChooser.addOption("4 Piece Real", new PathPlannerAuto("4 Note Auto Real"));
-    autoChooser.addOption("Two Piece Bottom to White Centerline", new PathPlannerAuto("Bottom Centerline Auto"));
+  //  autoChooser.addOption("Two Piece Bottom to White Centerline", new PathPlannerAuto("Bottom Centerline Auto"));
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
@@ -346,8 +350,8 @@ public class RobotContainer {
     m_robotDrive.setDefaultCommand(
            new RunCommand(
             () -> m_robotDrive.DriverDrive(
-                -mathProfiles.exponentialDrive(MathUtil.applyDeadband(m_driverControllerCommand.getLeftY(), OIConstants.kDriveDeadband), 2),
-                -mathProfiles.exponentialDrive(MathUtil.applyDeadband(m_driverControllerCommand.getLeftX(), OIConstants.kDriveDeadband), 2),
+                -mathProfiles.exponentialDrive(MathUtil.applyDeadband(m_driverControllerCommand.getLeftY(), OIConstants.kDriveDeadband), 2) * 0.6 ,
+                -mathProfiles.exponentialDrive(MathUtil.applyDeadband(m_driverControllerCommand.getLeftX(), OIConstants.kDriveDeadband), 2) * 0.6 ,
                 -MathUtil.applyDeadband(m_driverControllerCommand.getRightX(), OIConstants.kDriveDeadband),
                 true, true, m_driverController, false, false),
             m_robotDrive));
@@ -374,14 +378,67 @@ public class RobotContainer {
    * Associates each button with its corresponding command or action.
    */
   private void configureButtonBindings() {
+    //SINGLE CONTROLLER COMMANDS
+
+    driverL1.onTrue(pivot.pivotMoveCommand(PivotConstants.kPivotStow)); // Pivot Stow & Amp
+    driverL2.onTrue(new InstantCommand(() -> { // [Hold] Amp Shoot
+      endEffector.ampFlywheel();
+    }, endEffector)).onFalse(new InstantCommand(() -> {
+      endEffector.stopFlywheel();
+      endEffector.stopIntake();
+    }));
+    driverR1.onTrue(endEffector.toggleFlywheelCommand()); // [Toggle] Flywheel
+    driverR2.onTrue(endEffector.feedCommand()).onFalse(endEffector.stopIntakeCommand()); // Feed
+    
+    driverTriangle.whileTrue(new AutoIntake(endEffector)); // [Hold] Intake
+    driverSquare.onTrue(new InstantCommand(() -> { // [Hold] Outtake
+      endEffector.outtake();
+    })).onFalse(new InstantCommand(() -> {
+      endEffector.stopIntake();
+    }));
+    driverCircle.whileTrue(new RunCommand(() -> { // [Hold] AutoAim
+      pivot.autoAimPivot();
+    }, pivot)).onFalse(new InstantCommand(() -> {
+      pivot.setAngleDegree(0);
+    }));
+    driverCross.onTrue(new InstantCommand(() -> { // Zero Heading
+      m_robotDrive.zeroHeading();
+    }, m_robotDrive));
+
+    driverDPADUP.onTrue(new InstantCommand(() -> { // [Hold] Climber Up
+      climber.climbUP();
+    })).onFalse( new InstantCommand(() -> {
+      climber.stopClimb();
+    }));
+    driverDPADDOWN.onTrue(new InstantCommand(() -> { // [Hold] Climber Down
+      climber.climbDown();
+    })).onFalse( new InstantCommand(() -> {
+      climber.stopClimb();
+    }));
+    driverDPADLEFT.onTrue(pivot.pivotMoveCommand(PivotConstants.kPivotZero)); // Pivot Down
+    driverDPADRIGHT.onTrue(new InstantCommand(() -> { // Zero Pivot
+      pivot.zeroPivot();
+    }, pivot));
+
+    //driverFunnyLeft.onTrue();
+
+
+
+
+
+    // END SINGLE CONTROLLER COMMANDS
+
+
+
     // AUX COMMANDS
 
     // END EFFECTOR COMMANDS
 
+    
     auxR1.onTrue(endEffector.toggleFlywheelCommand());
 
     // auxTriangle.onTrue(new InstantCommand(() -> {
-    //   endEffector.intake();
+    //   endEffector.intake();f]
     // })).onFalse(new InstantCommand(() -> {
     //   endEffector.stopIntake();
     // }));
@@ -398,7 +455,7 @@ public class RobotContainer {
     // AUTO COMMANDS
     auxCircle.whileTrue(new RunCommand(() -> {
       pivot.autoAimPivot();
-    })).onFalse(new InstantCommand(() -> {
+    }, pivot)).onFalse(new InstantCommand(() -> {
       pivot.setAngleDegree(0);
     }));
 
