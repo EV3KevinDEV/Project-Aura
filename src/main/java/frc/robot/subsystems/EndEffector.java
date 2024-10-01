@@ -318,6 +318,7 @@ public class EndEffector extends SubsystemBase {
   public boolean AtShootingSpeed(double speed){
     return speed < flywheelRPM();
   }
+  
 
   @Override
   public void periodic() {
