@@ -420,12 +420,21 @@ public class DriveSubsystem extends SubsystemBase {
     double rotDelivered = m_currentRotation * DriveConstants.kMaxAngularSpeed;
     
     var swerveModuleStates =
+    // DriveConstants.kDriveKinematics.toSwerveModuleStates(
+    //         fieldRelative
+    //             ? ChassisSpeeds.fromFieldRelativeSpeeds(
+    //                 xSpeedDelivered, ySpeedDelivered, rotDelivered, Rotation2d.fromDegrees(getHeading()))
+    //             : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered)
+    //         );
     DriveConstants.kDriveKinematics.toSwerveModuleStates(
-            fieldRelative
-                ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                    xSpeedDelivered, ySpeedDelivered, rotDelivered, Rotation2d.fromDegrees(getHeading()))
-                : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered)
-            );
+      ChassisSpeeds.discretize(
+        fieldRelative
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                xSpeedDelivered, ySpeedDelivered, rotDelivered, Rotation2d.fromDegrees(getHeading()))
+            : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered),
+        AutoConstants.kSwerveDiscreteTimestep
+      )
+    );
     SwerveDriveKinematics.desaturateWheelSpeeds(
         swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
