@@ -167,6 +167,10 @@ public class MAXSwerveModule {
         new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset));
   }
 
+  public double cosineScale(Rotation2d currentAngle, Rotation2d desiredAngle) {
+    return desiredAngle.minus(currentAngle).getCos();
+  }
+
   /**
    * Returns the current position of the module.
    *
@@ -195,23 +199,10 @@ public class MAXSwerveModule {
     SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(correctedDesiredState,
         new Rotation2d(m_turningEncoder.getPosition()));
 
-    // Command driving and turning SPARKS MAX towards their respective setpoints.
-    // m_drivingKraken.setControl(optimizedDesiredState.speedMetersPerSecond, CANSparkMax.ControlType.kVelocity);
-    //convert m/s to rev/s
-
-    //v=rw
-    // formula is (m/s / radius of wheel) * gear_ratio = rev/s
-    //pid uses rev/s
-
     SmartDashboard.putNumber("Speed",  optimizedDesiredState.speedMetersPerSecond);
     
-
-    if (DriverStation.isAutonomous()) {
-      m_drivingKraken.setControl(m_velocityPID.withVelocity(optimizedDesiredState.speedMetersPerSecond));
-    } else {
-      // m_drivingKraken.set(optimizedDesiredState.speedMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond);
-      m_drivingKraken.setControl(m_openLoop.withOutput(optimizedDesiredState.speedMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond).withEnableFOC(true));
-    }
+  
+    m_drivingKraken.setControl(m_velocityPID.withVelocity(optimizedDesiredState.speedMetersPerSecond * cosineScale(Rotation2d.fromRadians(m_turningEncoder.getPosition()), correctedDesiredState.angle)));
 
     // m_drivingKraken.setControl(m_velocityPID.withVelocity((optimizedDesiredState.speedMetersPerSecond / 0.1016 / Math.PI) * 2048 * 3.56));
     m_turningPIDController.setReference(optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
