@@ -138,9 +138,7 @@ public class MAXSwerveModule {
     m_desiredState.angle = new Rotation2d(m_turningEncoder.getPosition());
     m_drivingKraken.setPosition(0);
     m_drivingKraken.setNeutralMode(NeutralModeValue.Brake);
-
     m_music.addInstrument(m_drivingKraken);
-
 
   }
 
@@ -167,6 +165,11 @@ public class MAXSwerveModule {
         new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset));
   }
 
+    /**
+   * The cosineScale method adjusts the wheel's speed based on the alignment between its current angle and the desired angle. While this method helps in minimizing lateral forces and ensuring smoother transitions, it doesn't inherently prevent the wheel from drifting or rotating when the speed is low. Thus, adding a mechanism to hold the angle becomes complementary to cosineScale.
+   *
+   * @return The current position of the module.
+   */
   public double cosineScale(Rotation2d currentAngle, Rotation2d desiredAngle) {
     return desiredAngle.minus(currentAngle).getCos();
   }
@@ -203,6 +206,7 @@ public class MAXSwerveModule {
     
   
     m_drivingKraken.setControl(m_velocityPID.withVelocity(optimizedDesiredState.speedMetersPerSecond * cosineScale(Rotation2d.fromRadians(m_turningEncoder.getPosition()), correctedDesiredState.angle)));
+    // m_drivingKraken.setControl(m_velocityPID.withVelocity(optimizedDesiredState.speedMetersPerSecond ));
 
     // m_drivingKraken.setControl(m_velocityPID.withVelocity((optimizedDesiredState.speedMetersPerSecond / 0.1016 / Math.PI) * 2048 * 3.56));
     m_turningPIDController.setReference(optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);

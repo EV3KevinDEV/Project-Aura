@@ -191,9 +191,9 @@ public class RobotContainer {
     ),
     endEffector.feedCommand(),
     Commands.waitSeconds(0.2),
-    endEffector.stopIntakeCommand(),
+    endEffector.stopIntakeCommand()
     // endEffector.stopFlywheelCommand()
-  ).finallyDo(() -> endEffector.stopFlywheel());
+  );
 
   // Command shootWithoutFlyWheel = Commands.parallel(
   //   endEffector.stopIntakeCommand(),  

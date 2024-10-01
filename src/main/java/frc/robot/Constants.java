@@ -100,7 +100,7 @@ public final class Constants {
     public static final Translation3d redSpeaker = new Translation3d(16.317, 5.55,2.1);
     // Driving Parameters - Note that these are not the maximum capable speeds of
     // the robot, rather the allowed maximum speeds
-    public static final double kMaxSpeedMetersPerSecond = 6.9
+    public static final double kMaxSpeedMetersPerSecond = 6.7
     ;
     public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
 
@@ -175,9 +175,9 @@ public final class Constants {
     public static final double kTurningEncoderPositionPIDMinInput = 0; // radians
     public static final double kTurningEncoderPositionPIDMaxInput = kTurningEncoderPositionFactor; // radians
 
-    public static final double kDrivingP = 0.3;
+    public static final double kDrivingP = 0.38;
     public static final double kDrivingI = 0.0;
-    public static final double kDrivingD = 0.0095;
+    public static final double kDrivingD = 0.003;
     public static final double kDrivingFF = 0;
     public static final double kDrivingMinOutput = -1;
     public static final double kDrivingMaxOutput = 1;
